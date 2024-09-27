@@ -19,10 +19,12 @@ public interface IPersonaService {
 
     public Persona findPersona(Long id);
 
-    //edicioón/modificación
+    //edición/modificación
 
-    public Persona editPersona (Long id, Long idNueva,
+    public void editPersona (Long idOriginal,
                                 String nuevoNombre,
                                 String nuevoApellido,
-                                int nuevaEdad);
+                                Integer nuevaEdad);
+
+    public void editPersona(Persona per);
 }

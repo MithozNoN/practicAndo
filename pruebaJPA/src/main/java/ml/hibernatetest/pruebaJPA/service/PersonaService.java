@@ -5,6 +5,7 @@ import ml.hibernatetest.pruebaJPA.repository.IPersonaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,6 +23,11 @@ public class PersonaService implements IPersonaService{
 
     @Override
     public void savePersona(Persona perso) {
+        // Si la persona no tiene un ID, asignamos el próximo ID disponible.
+        if (perso.getId() == null) {
+            Long nextId = personaRepo.findNextAvailableId();
+            perso.setId(nextId);
+        }
         personaRepo.save(perso);
     }
 
@@ -37,43 +43,31 @@ public class PersonaService implements IPersonaService{
     }
 
     @Override
-    public Persona editPersona(Long idOriginal, Long nuevaId, String nuevoNombre, String nuevoApellido, int nuevaEdad) {
-        // Busca la persona original
+    public void editPersona(Long idOriginal,
+                            String nuevoNombre,
+                            String nuevoApellido,
+                            Integer nuevaEdad) {
+        //Busco el objeto original
         Persona perso = this.findPersona(idOriginal);
 
-        if (perso == null) {
-            throw new IllegalArgumentException("Persona con id " + idOriginal + " no encontrada.");
-        }
-
-        // Si el id ha cambiado y nuevaId es diferente de null
-        if (nuevaId != null && !idOriginal.equals(nuevaId)) {
-            // Verifica si ya existe una persona con el nuevo id
-            if (this.findPersona(nuevaId) != null) {
-                throw new IllegalArgumentException("Persona con id " + nuevaId + " ya existe.");
+        //Comprobamos que el elemento exista, si existe, sobreeescribe la información
+        if (perso != null) {
+            // Solo actualiza los valores que no sean null
+            if (nuevoNombre != null) {
+                perso.setNombre(nuevoNombre);
             }
-
-            // Elimina la persona con el id original
-            this.deletePersona(idOriginal);
-
-            // Crea una nueva persona con el nuevo id
-            Persona nuevaPersona = new Persona();
-            nuevaPersona.setId(nuevaId);
-            nuevaPersona.setNombre(nuevoNombre != null ? nuevoNombre : perso.getNombre());
-            nuevaPersona.setApellido(nuevoApellido != null ? nuevoApellido : perso.getApellido());
-            nuevaPersona.setEdad(nuevaEdad > 0 ? nuevaEdad : perso.getEdad());
-
-            // Guarda la nueva persona con el id modificado
-            this.savePersona(nuevaPersona);
-            return nuevaPersona;
-        } else {
-            // Si el id no ha cambiado, actualiza los demás atributos
-            if (nuevoNombre != null) perso.setNombre(nuevoNombre);
-            if (nuevoApellido != null) perso.setApellido(nuevoApellido);
-            if (nuevaEdad > 0) perso.setEdad(nuevaEdad);
-
-            // Guarda la persona con los datos actualizados
+            if (nuevoApellido != null) {
+                perso.setApellido(nuevoApellido);
+            }
+            if (nuevaEdad != null) {
+                perso.setEdad(nuevaEdad);
+            }
             this.savePersona(perso);
-            return perso;
         }
+    }
+
+    @Override
+    public void editPersona(Persona per) {
+        this.savePersona(per);
     }
 }

@@ -32,15 +32,23 @@ public class PersonaController {
         return "La persona ha sido eliminada correctamente";
     }
 
-    @PutMapping("/personas/modificar/{id}")
-    public Persona editPersona (@PathVariable Long id,
-                                @RequestParam(required = false, name = "id") Long nuevaId,
+    @PutMapping("/personas/modificar/{id_original}")
+    public Persona editPersona (@PathVariable Long id_original,
                                 @RequestParam(required = false, name = "nombre") String nuevoNombre,
                                 @RequestParam(required = false, name = "apellido") String nuevoApellido,
-                                @RequestParam(required = false, name = "edad") int nuevaEdad) {
-        Persona personaModificada = persoServ.editPersona(id, nuevaId,nuevoNombre, nuevoApellido, nuevaEdad);
-        return personaModificada;
+                                @RequestParam(required = false, name = "edad") Integer nuevaEdad) {
 
+        persoServ.editPersona(id_original, nuevoNombre, nuevoApellido, nuevaEdad);
+
+        Persona perso = persoServ.findPersona(id_original);
+
+        return perso;
     }
 
+    @PutMapping("/personas/modificar")
+    public Persona editPersona(@RequestBody Persona per) {
+        persoServ.editPersona(per);
+
+        return persoServ.findPersona(per.getId());
+    }
 }
